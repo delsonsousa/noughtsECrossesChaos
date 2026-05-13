@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Noughts & Crosses Chaos"
+  },
+  "home": {
+    "playLocal": "JUGAR CON AMIGO",
+    "vsComputer": "JUGAR CONTRA IA",
+    "chooseDifficulty": "Elige la dificultad",
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil",
+    "settings": "Ajustes",
+    "highScore": "Temporada",
+    "seasonSince": "desde {{date}}",
+    "localScore": "Jugador 1 x Jugador 2",
+    "cpuScore": "Jugador x IA",
+    "player": "Tú",
+    "player1": "J1",
+    "player2": "J2",
+    "ai": "IA",
+    "tagline": "El tres en raya infinito"
+  },
+  "game": {
+    "turn": "Turno de {{player}}",
+    "wins": "¡{{player}} ganó!",
+    "playAgain": "Jugar de nuevo",
+    "menu": "Menú",
+    "reset": "Reiniciar",
+    "player": "Tú",
+    "player1": "J1",
+    "player2": "J2",
+    "ai": "IA"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "sound": "Sonido",
+    "haptics": "Vibración",
+    "language": "Idioma",
+    "resetScores": "Reiniciar temporada",
+    "confirmReset": "¿Reiniciar las puntuaciones de esta temporada?",
+    "yes": "Sí",
+    "cancel": "Cancelar"
+  }
+}

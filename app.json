@@ -1,48 +1,76 @@
 {
   "expo": {
-    "name": "noughtsECrossesChaos",
-    "slug": "noughtsECrossesChaos",
+    "name": "Noughts & Crosses Chaos",
+    "slug": "noughts-crosses-chaos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "noughtsecrosseschaos",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "backgroundColor": "#0A0118",
+      "resizeMode": "contain"
     },
     "plugins": [
-      "expo-router",
+      "expo-localization",
       [
-        "expo-splash-screen",
+        "react-native-google-mobile-ads",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
         }
-      ]
+      ],
+      "expo-font"
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    }
+    "android": {
+      "package": "com.delson.noughtscrosseschaos",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png",
+        "backgroundColor": "#090014"
+      },
+      "permissions": [
+        "com.google.android.gms.permission.AD_ID"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.delson.noughtscrosseschaos",
+      "supportsTablet": true,
+      "infoPlist": {
+        "SKAdNetworkItems": [],
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "CFBundleLocalizations": [
+          "en",
+          "pt",
+          "es",
+          "en",
+          "pt",
+          "es",
+          "en",
+          "pt",
+          "es",
+          "en",
+          "pt",
+          "es"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "extra": {
+      "supportedLocales": [
+        "en",
+        "pt",
+        "es",
+        "en",
+        "pt",
+        "es"
+      ],
+      "eas": {
+        "projectId": "80750b42-25a8-4822-9cb4-ea5282e46308"
+      }
+    },
+    "owner": "delsonsousajr"
   }
 }

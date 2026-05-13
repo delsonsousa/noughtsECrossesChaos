@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Noughts & Crosses Chaos"
+  },
+  "home": {
+    "playLocal": "PLAY WITH A FRIEND",
+    "vsComputer": "PLAY VS AI",
+    "chooseDifficulty": "Choose difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "settings": "Settings",
+    "highScore": "Season",
+    "seasonSince": "since {{date}}",
+    "localScore": "Player 1 vs Player 2",
+    "cpuScore": "Player vs AI",
+    "player": "You",
+    "player1": "P1",
+    "player2": "P2",
+    "ai": "AI",
+    "tagline": "The infinite tic-tac-toe"
+  },
+  "game": {
+    "turn": "{{player}}'s turn",
+    "wins": "{{player}} wins!",
+    "playAgain": "Play Again",
+    "menu": "Menu",
+    "reset": "Reset",
+    "player": "You",
+    "player1": "P1",
+    "player2": "P2",
+    "ai": "AI"
+  },
+  "settings": {
+    "title": "Settings",
+    "sound": "Sound",
+    "haptics": "Haptic Feedback",
+    "language": "Language",
+    "resetScores": "Reset Season",
+    "confirmReset": "Reset this season's scores?",
+    "yes": "Yes",
+    "cancel": "Cancel"
+  }
+}

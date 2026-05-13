@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Noughts & Crosses Chaos"
+  },
+  "home": {
+    "playLocal": "JOGAR COM AMIGO",
+    "vsComputer": "JOGAR CONTRA IA",
+    "chooseDifficulty": "Escolha a dificuldade",
+    "easy": "Fácil",
+    "medium": "Médio",
+    "hard": "Difícil",
+    "settings": "Configurações",
+    "highScore": "Temporada",
+    "seasonSince": "desde {{date}}",
+    "localScore": "Player 1 x Player 2",
+    "cpuScore": "Player x IA",
+    "player": "Você",
+    "player1": "P1",
+    "player2": "P2",
+    "ai": "IA",
+    "tagline": "O jogo da velha infinito"
+  },
+  "game": {
+    "turn": "Vez de {{player}}",
+    "wins": "{{player}} venceu!",
+    "playAgain": "Jogar novamente",
+    "menu": "Menu",
+    "reset": "Reiniciar",
+    "player": "Você",
+    "player1": "P1",
+    "player2": "P2",
+    "ai": "IA"
+  },
+  "settings": {
+    "title": "Configurações",
+    "sound": "Som",
+    "haptics": "Vibração",
+    "language": "Idioma",
+    "resetScores": "Zerar temporada",
+    "confirmReset": "Zerar os placares desta temporada?",
+    "yes": "Sim",
+    "cancel": "Cancelar"
+  }
+}

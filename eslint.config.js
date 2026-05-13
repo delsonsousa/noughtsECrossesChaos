@@ -5,6 +5,14 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
+    settings: {
+      'import/ignore': [
+        'node_modules[\\\\/]+@?react-native',
+        'node_modules[\\\\/]+react-native-svg',
+      ],
+    },
+  },
+  {
     ignores: ['dist/*'],
   },
 ]);
