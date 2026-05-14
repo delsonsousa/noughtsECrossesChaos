@@ -1,9 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
-import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
-import { getBannerAdId } from '../utils/ads';
+import { getBannerAdId, getGoogleMobileAdsModule } from '../utils/ads';
 
 export const AdBanner: React.FC = () => {
+  const ads = getGoogleMobileAdsModule();
+
+  if (ads == null) {
+    return null;
+  }
+
+  const { BannerAd, BannerAdSize } = ads;
+
   return (
     <View style={{ alignItems: 'center', paddingBottom: 4 }}>
       <BannerAd

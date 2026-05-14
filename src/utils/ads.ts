@@ -1,11 +1,11 @@
-import {
-  TestIds,
-  InterstitialAd,
-  AdEventType,
-} from 'react-native-google-mobile-ads';
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from './constants';
+
+type GoogleMobileAdsModule = typeof import('react-native-google-mobile-ads');
+type InterstitialAdInstance = ReturnType<
+  GoogleMobileAdsModule['InterstitialAd']['createForAdRequest']
+>;
 
 // Replace these with your real AdMob IDs before going to production
 const BANNER_ID_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
@@ -14,20 +14,45 @@ const INTERSTITIAL_ID_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
 const INTERSTITIAL_ID_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
 const GAME_START_INTERSTITIAL_INTERVAL_MS = 2 * 60 * 1000;
 const GAME_START_INTERSTITIAL_MATCHES = 5;
+const GOOGLE_MOBILE_ADS_NATIVE_MODULE = 'RNGoogleMobileAdsModule';
+
+let googleMobileAdsModule: GoogleMobileAdsModule | null | undefined;
+
+export const getGoogleMobileAdsModule = (): GoogleMobileAdsModule | null => {
+  if (NativeModules[GOOGLE_MOBILE_ADS_NATIVE_MODULE] == null) {
+    return null;
+  }
+
+  if (googleMobileAdsModule !== undefined) {
+    return googleMobileAdsModule;
+  }
+
+  try {
+    // The static import crashes Expo Go because this native module is not in its binary.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    googleMobileAdsModule = require('react-native-google-mobile-ads');
+  } catch {
+    googleMobileAdsModule = null;
+  }
+
+  return googleMobileAdsModule ?? null;
+};
 
 export const getBannerAdId = (): string => {
-  if (__DEV__) return TestIds.BANNER;
+  const ads = getGoogleMobileAdsModule();
+  if (__DEV__ && ads != null) return ads.TestIds.BANNER;
   return Platform.OS === 'ios' ? BANNER_ID_IOS : BANNER_ID_ANDROID;
 };
 
 const getInterstitialAdId = (): string => {
-  if (__DEV__) return TestIds.INTERSTITIAL;
+  const ads = getGoogleMobileAdsModule();
+  if (__DEV__ && ads != null) return ads.TestIds.INTERSTITIAL;
   return Platform.OS === 'ios'
     ? INTERSTITIAL_ID_IOS
     : INTERSTITIAL_ID_ANDROID;
 };
 
-let interstitial: InterstitialAd | null = null;
+let interstitial: InterstitialAdInstance | null = null;
 let interstitialLoaded = false;
 let interstitialShowing = false;
 
@@ -42,13 +67,18 @@ const parseStoredPositiveNumber = (value: string | null): number | null => {
 
 const loadInterstitial = () => {
   try {
-    interstitial = InterstitialAd.createForAdRequest(getInterstitialAdId(), {
+    const ads = getGoogleMobileAdsModule();
+    if (ads == null) {
+      return;
+    }
+
+    interstitial = ads.InterstitialAd.createForAdRequest(getInterstitialAdId(), {
       requestNonPersonalizedAdsOnly: false,
     });
-    interstitial.addAdEventListener(AdEventType.LOADED, () => {
+    interstitial.addAdEventListener(ads.AdEventType.LOADED, () => {
       interstitialLoaded = true;
     });
-    interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+    interstitial.addAdEventListener(ads.AdEventType.CLOSED, () => {
       interstitialLoaded = false;
       interstitialShowing = false;
       loadInterstitial();
@@ -60,6 +90,26 @@ const loadInterstitial = () => {
 };
 
 export const initInterstitial = () => loadInterstitial();
+
+export const initAds = async (): Promise<void> => {
+  try {
+    const ads = getGoogleMobileAdsModule();
+    if (ads == null) {
+      return;
+    }
+
+    const mobileAds = ads.default;
+    await mobileAds().setRequestConfiguration({
+      maxAdContentRating: ads.MaxAdContentRating.G,
+      tagForChildDirectedTreatment: false,
+      tagForUnderAgeOfConsent: false,
+    });
+    await mobileAds().initialize();
+    initInterstitial();
+  } catch {
+    // silently fail if AdMob is not available in the current runtime
+  }
+};
 
 export const showInterstitial = async (): Promise<boolean> => {
   try {

@@ -4,7 +4,6 @@ import './src/i18n';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads';
 
 import { Bungee_400Regular, useFonts } from '@expo-google-fonts/bungee';
 import { SpaceGrotesk_500Medium } from '@expo-google-fonts/space-grotesk';
@@ -13,7 +12,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { GameProvider } from './src/store/GameContext';
-import { initInterstitial } from './src/utils/ads';
+import { initAds } from './src/utils/ads';
 import type { CpuDifficulty, GameMode } from './src/utils/gameModes';
 
 export type RootStackParamList = {
@@ -38,20 +37,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        await mobileAds().setRequestConfiguration({
-          maxAdContentRating: MaxAdContentRating.G,
-          tagForChildDirectedTreatment: false,
-          tagForUnderAgeOfConsent: false,
-        });
-        await mobileAds().initialize();
-        initInterstitial();
-      } catch {
-        // silently fail if AdMob not yet configured
-      }
-    };
-    init();
+    void initAds();
   }, []);
 
   if (!splashDone) {

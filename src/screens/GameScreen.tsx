@@ -9,16 +9,18 @@ import {
   Modal,
   StatusBar,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Svg, { Circle, Line } from 'react-native-svg';
 import { colors } from '../theme/colors';
 import { Grid } from '../components/Grid';
 import { Button } from '../components/Button';
 import { AdBanner } from '../components/AdBanner';
+import { HomeAtmosphere } from '../components/HomeAtmosphere';
 import { useGameLogic } from '../hooks/useGameLogic';
-import { useSound } from '../hooks/useSound';
+import { useFeedback } from '../hooks/useFeedback';
 import { useGameContext } from '../store/GameContext';
 import { maybeShowGameStartInterstitial } from '../utils/ads';
 import { chooseCpuMove } from '../utils/ai';
@@ -40,8 +42,12 @@ const CELEBRATION_PARTICLES = [
 
 export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
   const { t } = useTranslation();
-  const { hapticsEnabled, recordWin } = useGameContext();
-  const { playPop, playWin } = useSound();
+  const { recordWin } = useGameContext();
+  const {
+    action: playActionFeedback,
+    move: playMoveFeedback,
+    success: playSuccessFeedback,
+  } = useFeedback();
   const { pieces, currentPlayer, winner, winningLine, nextToVanish, placePiece, resetGame } =
     useGameLogic();
 
@@ -68,10 +74,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       recordedWinnerRef.current = roundWinner;
-      playWin();
-      if (hapticsEnabled) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      playSuccessFeedback();
       setMatchScores((prev) => ({
         ...prev,
         [roundWinner]: prev[roundWinner] + 1,
@@ -94,7 +97,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
       ]).start();
       setShowWinModal(true);
     },
-    [celebrationAnim, confettiAnim, hapticsEnabled, mode, playWin, recordWin]
+    [celebrationAnim, confettiAnim, mode, playSuccessFeedback, recordWin]
   );
 
   useEffect(
@@ -108,14 +111,13 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
         return;
       }
 
-      playPop();
-      if (hapticsEnabled) Haptics.selectionAsync();
+      playMoveFeedback();
       const roundWinner = placePiece(index);
       if (roundWinner) {
         handleRoundWin(roundWinner);
       }
     },
-    [handleRoundWin, hapticsEnabled, isCpuTurn, placePiece, playPop]
+    [handleRoundWin, isCpuTurn, placePiece, playMoveFeedback]
   );
 
   useEffect(() => {
@@ -130,7 +132,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
         return;
       }
 
-      playPop();
+      playMoveFeedback();
       const roundWinner = placePiece(position);
       if (roundWinner) {
         handleRoundWin(roundWinner);
@@ -138,9 +140,10 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
     }, 450);
 
     return () => clearTimeout(cpuMoveTimer);
-  }, [difficulty, handleRoundWin, isCpuTurn, pieces, placePiece, playPop]);
+  }, [difficulty, handleRoundWin, isCpuTurn, pieces, placePiece, playMoveFeedback]);
 
   const handlePlayAgain = () => {
+    playActionFeedback();
     setShowWinModal(false);
     confettiAnim.setValue(0);
     celebrationAnim.setValue(0);
@@ -150,6 +153,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleReset = () => {
+    playActionFeedback();
     setShowWinModal(false);
     confettiAnim.setValue(0);
     celebrationAnim.setValue(0);
@@ -159,6 +163,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleMenu = () => {
+    playActionFeedback();
     setShowWinModal(false);
     confettiAnim.setValue(0);
     celebrationAnim.setValue(0);
@@ -175,169 +180,274 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
     mode === 'cpu' ? t('game.ai') : t('game.player2');
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+    <LinearGradient
+      colors={[colors.backgroundTop, colors.backgroundMid, colors.background]}
+      style={styles.safe}
+    >
+      <HomeAtmosphere />
+      <SafeAreaView style={styles.content}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={handleMenu} style={styles.headerBtn}>
-          <Text style={styles.headerBtnText}>{t('game.menu')}</Text>
-        </Pressable>
-        <View style={styles.headerScoreRow}>
-          <Text style={[styles.headerScore, { color: colors.playerX }]}>
-            {leftScoreLabel}
-          </Text>
-          <Text style={styles.headerScoreValue}>
-            {matchScores.X}
-          </Text>
-          <Text style={styles.headerScoreSep}>-</Text>
-          <Text style={styles.headerScoreValue}>
-            {matchScores.O}
-          </Text>
-          <Text style={[styles.headerScore, { color: colors.playerO }]}>
-            {rightScoreLabel}
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={handleMenu} style={styles.headerBtn}>
+            <Text style={styles.headerBtnText}>{t('game.menu')}</Text>
+          </Pressable>
+          <View style={styles.headerScoreRow}>
+            <Text style={[styles.headerScore, { color: colors.playerX }]}>
+              {leftScoreLabel}
+            </Text>
+            <Text style={styles.headerScoreValue}>
+              {matchScores.X}
+            </Text>
+            <Text style={styles.headerScoreSep}>-</Text>
+            <Text style={styles.headerScoreValue}>
+              {matchScores.O}
+            </Text>
+            <Text style={[styles.headerScore, { color: colors.playerO }]}>
+              {rightScoreLabel}
+            </Text>
+          </View>
+          <Pressable
+            onPress={handleReset}
+            style={styles.headerBtn}
+          >
+            <Text style={styles.headerBtnText}>{t('game.reset')}</Text>
+          </Pressable>
+        </View>
+
+        {/* Turn indicator */}
+        <View style={styles.turnRow}>
+          <View style={[styles.turnDot, { backgroundColor: playerColor }]} />
+          <Text style={[styles.turnText, { color: playerColor }]}>
+            {t('game.turn', { player: currentPlayer })}
           </Text>
         </View>
-        <Pressable
-          onPress={handleReset}
-          style={styles.headerBtn}
+
+        {/* Board */}
+        <View style={styles.boardWrap}>
+          <Grid
+            pieces={pieces}
+            winningLine={winningLine}
+            nextToVanish={nextToVanish}
+            onCellPress={handleCellPress}
+            disabled={!!winner || isCpuTurn}
+          />
+        </View>
+
+        <AdBanner />
+
+        {/* Win Modal */}
+        <Modal
+          visible={showWinModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => {}}
         >
-          <Text style={styles.headerBtnText}>{t('game.reset')}</Text>
-        </Pressable>
-      </View>
-
-      {/* Turn indicator */}
-      <View style={styles.turnRow}>
-        <View style={[styles.turnDot, { backgroundColor: playerColor }]} />
-        <Text style={[styles.turnText, { color: playerColor }]}>
-          {t('game.turn', { player: currentPlayer })}
-        </Text>
-      </View>
-
-      {/* Board */}
-      <View style={styles.boardWrap}>
-        <Grid
-          pieces={pieces}
-          winningLine={winningLine}
-          nextToVanish={nextToVanish}
-          onCellPress={handleCellPress}
-          disabled={!!winner || isCpuTurn}
-        />
-      </View>
-
-      <AdBanner />
-
-      {/* Win Modal */}
-      <Modal
-        visible={showWinModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {}}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View
-            style={[
-              styles.modalCard,
-              {
-                opacity: confettiAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.72, 1],
-                }),
-                transform: [
-                  {
-                    scale: confettiAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.7, 1],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.celebrationStage}>
-              {CELEBRATION_PARTICLES.map((particle, index) => (
-                <Animated.View
-                  key={`${particle.color}-${particle.x}-${index}`}
-                  style={[
-                    styles.celebrationParticle,
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalCard,
+                {
+                  opacity: confettiAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.72, 1],
+                  }),
+                  transform: [
                     {
-                      width: particle.size,
-                      height: particle.size,
-                      borderRadius: particle.size / 2,
-                      backgroundColor: particle.color,
+                      scale: confettiAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.7, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <View style={styles.celebrationStage}>
+                {CELEBRATION_PARTICLES.map((particle, index) => (
+                  <Animated.View
+                    key={`${particle.color}-${particle.x}-${index}`}
+                    style={[
+                      styles.celebrationParticle,
+                      {
+                        width: particle.size,
+                        height: particle.size,
+                        borderRadius: particle.size / 2,
+                        backgroundColor: particle.color,
+                        opacity: celebrationAnim.interpolate({
+                          inputRange: [0, 0.16, 0.78, 1],
+                          outputRange: [0, 1, 0.96, 0],
+                        }),
+                        transform: [
+                          {
+                            translateX: celebrationAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, particle.x],
+                            }),
+                          },
+                          {
+                            translateY: celebrationAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [12, particle.y],
+                            }),
+                          },
+                          {
+                            scale: celebrationAnim.interpolate({
+                              inputRange: [0, 0.24, 1],
+                              outputRange: [0.3, 1.15, 0.72],
+                            }),
+                          },
+                          { rotate: particle.rotate },
+                        ],
+                      },
+                    ]}
+                  />
+                ))}
+
+                <Animated.View
+                  style={[
+                    styles.celebrationGlyph,
+                    {
                       opacity: celebrationAnim.interpolate({
-                        inputRange: [0, 0.16, 0.78, 1],
-                        outputRange: [0, 1, 0.96, 0],
+                        inputRange: [0, 0.18, 1],
+                        outputRange: [0, 1, 1],
                       }),
                       transform: [
                         {
-                          translateX: celebrationAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, particle.x],
-                          }),
-                        },
-                        {
-                          translateY: celebrationAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [12, particle.y],
-                          }),
-                        },
-                        {
                           scale: celebrationAnim.interpolate({
-                            inputRange: [0, 0.24, 1],
-                            outputRange: [0.3, 1.15, 0.72],
+                            inputRange: [0, 0.4, 1],
+                            outputRange: [0.4, 1.18, 1],
                           }),
                         },
-                        { rotate: particle.rotate },
                       ],
                     },
                   ]}
+                >
+                  {winner ? <CelebrationMark player={winner} /> : null}
+                </Animated.View>
+              </View>
+
+              <Text style={styles.winText}>
+                {t('game.wins', { player: winner })}
+              </Text>
+
+              <View style={styles.modalActions}>
+                <Button
+                  label={t('game.playAgain')}
+                  onPress={handlePlayAgain}
                 />
-              ))}
+                <Button
+                  label={t('game.menu')}
+                  onPress={handleMenu}
+                  variant="secondary"
+                />
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+};
 
-              <Animated.Text
-                style={[
-                  styles.celebrationGlyph,
-                  {
-                    color: winner === 'X' ? colors.playerX : colors.playerO,
-                    opacity: celebrationAnim.interpolate({
-                      inputRange: [0, 0.18, 1],
-                      outputRange: [0, 1, 1],
-                    }),
-                    transform: [
-                      {
-                        scale: celebrationAnim.interpolate({
-                          inputRange: [0, 0.4, 1],
-                          outputRange: [0.4, 1.18, 1],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                {winner}
-              </Animated.Text>
-            </View>
+const CelebrationMark = ({ player }: { player: 'X' | 'O' }) => {
+  const color = player === 'X' ? colors.playerX : colors.playerO;
 
-            <Text style={styles.winText}>
-              {t('game.wins', { player: winner })}
-            </Text>
+  if (player === 'O') {
+    return (
+      <Svg width={82} height={82} viewBox="0 0 82 82">
+        <Circle
+          cx={41}
+          cy={41}
+          r={21}
+          stroke={color}
+          strokeWidth={22}
+          strokeOpacity={0.14}
+          fill="none"
+        />
+        <Circle
+          cx={41}
+          cy={41}
+          r={21}
+          stroke={color}
+          strokeWidth={16}
+          strokeOpacity={0.32}
+          fill="none"
+        />
+        <Circle
+          cx={41}
+          cy={41}
+          r={21}
+          stroke={color}
+          strokeWidth={12}
+          fill="none"
+        />
+      </Svg>
+    );
+  }
 
-            <View style={styles.modalActions}>
-              <Button
-                label={t('game.playAgain')}
-                onPress={handlePlayAgain}
-              />
-              <Button
-                label={t('game.menu')}
-                onPress={handleMenu}
-                variant="secondary"
-              />
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+  return (
+    <Svg width={82} height={82} viewBox="0 0 82 82">
+      <Line
+        x1={24}
+        y1={24}
+        x2={58}
+        y2={58}
+        stroke={color}
+        strokeWidth={22}
+        strokeOpacity={0.14}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={58}
+        y1={24}
+        x2={24}
+        y2={58}
+        stroke={color}
+        strokeWidth={22}
+        strokeOpacity={0.14}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={24}
+        y1={24}
+        x2={58}
+        y2={58}
+        stroke={color}
+        strokeWidth={16}
+        strokeOpacity={0.32}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={58}
+        y1={24}
+        x2={24}
+        y2={58}
+        stroke={color}
+        strokeWidth={16}
+        strokeOpacity={0.32}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={24}
+        y1={24}
+        x2={58}
+        y2={58}
+        stroke={color}
+        strokeWidth={10}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={58}
+        y1={24}
+        x2={24}
+        y2={58}
+        stroke={color}
+        strokeWidth={10}
+        strokeLinecap="round"
+      />
+    </Svg>
   );
 };
 
@@ -345,6 +455,9 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  content: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -418,7 +531,7 @@ const styles = StyleSheet.create({
   },
   celebrationStage: {
     width: 220,
-    height: 72,
+    height: 92,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -426,11 +539,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   celebrationGlyph: {
-    fontSize: 34,
-    fontWeight: '900',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 18,
-    textShadowColor: colors.text,
+    width: 96,
+    height: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   winText: {
     fontSize: 32,

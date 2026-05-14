@@ -4,7 +4,7 @@
   },
   "home": {
     "playLocal": "JUGAR CON AMIGO",
-    "vsComputer": "JUGAR CONTRA IA",
+    "vsComputer": "JUGAR VS IA",
     "chooseDifficulty": "Elige la dificultad",
     "easy": "Fácil",
     "medium": "Medio",
@@ -18,7 +18,12 @@
     "player1": "J1",
     "player2": "J2",
     "ai": "IA",
-    "tagline": "El tres en raya infinito"
+    "tagline": "El tres en raya infinito",
+    "yourStats": "Tus estadísticas",
+    "streak": "Racha",
+    "winRate": "Win rate",
+    "today": "Hoy",
+    "total": "Total"
   },
   "game": {
     "turn": "Turno de {{player}}",

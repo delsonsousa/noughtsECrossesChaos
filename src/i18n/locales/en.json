@@ -18,7 +18,12 @@
     "player1": "P1",
     "player2": "P2",
     "ai": "AI",
-    "tagline": "The infinite tic-tac-toe"
+    "tagline": "The infinite tic-tac-toe",
+    "yourStats": "Your stats",
+    "streak": "Streak",
+    "winRate": "Win rate",
+    "today": "Today",
+    "total": "Total"
   },
   "game": {
     "turn": "{{player}}'s turn",

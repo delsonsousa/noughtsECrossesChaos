@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useFeedback } from '../hooks/useFeedback';
 import { useGameContext } from '../store/GameContext';
 import { colors } from '../theme/colors';
 
@@ -13,6 +14,7 @@ type LangCode = (typeof LANGUAGES)[number]['code'];
 
 export const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useGameContext();
+  const { toggle: playToggleFeedback } = useFeedback();
 
   return (
     <View style={styles.row}>
@@ -21,7 +23,12 @@ export const LanguageSelector: React.FC = () => {
         return (
           <Pressable
             key={code}
-            onPress={() => setLanguage(code as LangCode)}
+            onPress={() => {
+              if (!active) {
+                playToggleFeedback();
+              }
+              void setLanguage(code as LangCode);
+            }}
             style={[styles.item, active && styles.itemActive]}
           >
             <Text style={styles.flag}>{flag}</Text>

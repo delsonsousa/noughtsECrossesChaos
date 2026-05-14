@@ -15,6 +15,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { AdBanner } from '../components/AdBanner';
+import { useFeedback } from '../hooks/useFeedback';
 import { useGameContext } from '../store/GameContext';
 import type { RootStackParamList } from '../../App';
 
@@ -35,6 +36,10 @@ const SettingRow: React.FC<{
 export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const { t } = useTranslation();
   const {
+    action: playActionFeedback,
+    toggle: playToggleFeedback,
+  } = useFeedback();
+  const {
     soundEnabled,
     hapticsEnabled,
     setSoundEnabled,
@@ -42,7 +47,23 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     resetScores,
   } = useGameContext();
 
+  const handleBack = () => {
+    playActionFeedback();
+    navigation.goBack();
+  };
+
+  const handleSoundChange = (value: boolean) => {
+    playToggleFeedback({ forceSound: value });
+    void setSoundEnabled(value);
+  };
+
+  const handleHapticsChange = (value: boolean) => {
+    playToggleFeedback({ forceHaptics: value });
+    void setHapticsEnabled(value);
+  };
+
   const handleResetScores = () => {
+    playActionFeedback();
     Alert.alert(
       t('settings.resetScores'),
       t('settings.confirmReset'),
@@ -62,7 +83,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+        <Pressable onPress={handleBack} style={styles.back}>
           <Text style={styles.backText}>‹</Text>
         </Pressable>
         <Text style={styles.title}>{t('settings.title')}</Text>
@@ -79,7 +100,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             right={
               <Switch
                 value={soundEnabled}
-                onValueChange={setSoundEnabled}
+                onValueChange={handleSoundChange}
                 trackColor={{ true: colors.accent, false: colors.textMuted }}
                 thumbColor={colors.text}
               />
@@ -90,7 +111,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             right={
               <Switch
                 value={hapticsEnabled}
-                onValueChange={setHapticsEnabled}
+                onValueChange={handleHapticsChange}
                 trackColor={{ true: colors.accent, false: colors.textMuted }}
                 thumbColor={colors.text}
               />

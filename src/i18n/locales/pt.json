@@ -4,7 +4,7 @@
   },
   "home": {
     "playLocal": "JOGAR COM AMIGO",
-    "vsComputer": "JOGAR CONTRA IA",
+    "vsComputer": "JOGAR VS IA",
     "chooseDifficulty": "Escolha a dificuldade",
     "easy": "Fácil",
     "medium": "Médio",
@@ -18,7 +18,12 @@
     "player1": "P1",
     "player2": "P2",
     "ai": "IA",
-    "tagline": "O jogo da velha infinito"
+    "tagline": "O jogo da velha infinito",
+    "yourStats": "Suas estatísticas",
+    "streak": "Sequência",
+    "winRate": "Win rate",
+    "today": "Hoje",
+    "total": "Total"
   },
   "game": {
     "turn": "Vez de {{player}}",

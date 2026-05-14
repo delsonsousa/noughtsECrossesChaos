@@ -27,6 +27,8 @@ interface GameContextValue {
   scoreboards: Scoreboards;
   scoreboardsResetAt: number;
   completedMatches: number;
+  currentStreak: number;
+  todayMatches: number;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
   language: Language;
@@ -77,6 +79,24 @@ const normalizeScoreboards = (storedScores: string | null): Scoreboards => {
   return EMPTY_SCOREBOARDS;
 };
 
+const parseStoredNonNegativeNumber = (value: string | null): number | null => {
+  if (value == null) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+};
+
+const getTodayKey = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -88,6 +108,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   );
   const [completedMatches, setCompletedMatches] = useState(0);
   const completedMatchesRef = useRef(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const currentStreakRef = useRef(0);
+  const [todayMatches, setTodayMatches] = useState(0);
+  const todayMatchesRef = useRef(0);
+  const todayMatchDateRef = useRef(getTodayKey());
   const [soundEnabled, setSoundEnabledState] = useState(true);
   const [hapticsEnabled, setHapticsEnabledState] = useState(true);
   const [language, setLanguageState] = useState<Language>('en');
@@ -100,6 +125,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           storedScores,
           storedScoresResetAt,
           storedCompletedMatches,
+          storedCurrentStreak,
+          storedTodayMatchDate,
+          storedTodayMatches,
           storedSound,
           storedHaptics,
           storedLang,
@@ -107,6 +135,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           AsyncStorage.getItem(STORAGE_KEYS.SCORES),
           AsyncStorage.getItem(STORAGE_KEYS.SCORES_RESET_AT),
           AsyncStorage.getItem(STORAGE_KEYS.COMPLETED_MATCHES),
+          AsyncStorage.getItem(STORAGE_KEYS.CURRENT_STREAK),
+          AsyncStorage.getItem(STORAGE_KEYS.TODAY_MATCH_DATE),
+          AsyncStorage.getItem(STORAGE_KEYS.TODAY_MATCHES),
           AsyncStorage.getItem(STORAGE_KEYS.SOUND_ENABLED),
           AsyncStorage.getItem(STORAGE_KEYS.HAPTICS_ENABLED),
           AsyncStorage.getItem(STORAGE_KEYS.LANGUAGE),
@@ -129,11 +160,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           ).catch(() => {});
         }
         if (storedCompletedMatches) {
-          const parsedMatches = Number.parseInt(storedCompletedMatches, 10);
-          if (Number.isFinite(parsedMatches) && parsedMatches >= 0) {
+          const parsedMatches =
+            parseStoredNonNegativeNumber(storedCompletedMatches);
+          if (parsedMatches != null) {
             completedMatchesRef.current = parsedMatches;
             setCompletedMatches(parsedMatches);
           }
+        }
+        const parsedStreak =
+          parseStoredNonNegativeNumber(storedCurrentStreak) ?? 0;
+        currentStreakRef.current = parsedStreak;
+        setCurrentStreak(parsedStreak);
+
+        const todayKey = getTodayKey();
+        if (storedTodayMatchDate === todayKey) {
+          const parsedTodayMatches =
+            parseStoredNonNegativeNumber(storedTodayMatches) ?? 0;
+          todayMatchDateRef.current = todayKey;
+          todayMatchesRef.current = parsedTodayMatches;
+          setTodayMatches(parsedTodayMatches);
+        } else {
+          todayMatchDateRef.current = todayKey;
+          todayMatchesRef.current = 0;
+          setTodayMatches(0);
+          AsyncStorage.multiSet([
+            [STORAGE_KEYS.TODAY_MATCH_DATE, todayKey],
+            [STORAGE_KEYS.TODAY_MATCHES, '0'],
+          ]).catch(() => {});
         }
         if (storedSound !== null) setSoundEnabledState(storedSound === 'true');
         if (storedHaptics !== null)
@@ -178,20 +231,51 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       String(nextCompletedMatches)
     ).catch(() => {});
 
+    const nextStreak = player === 'X' ? currentStreakRef.current + 1 : 0;
+    currentStreakRef.current = nextStreak;
+    setCurrentStreak(nextStreak);
+    AsyncStorage.setItem(
+      STORAGE_KEYS.CURRENT_STREAK,
+      String(nextStreak)
+    ).catch(() => {});
+
+    const todayKey = getTodayKey();
+    const nextTodayMatches =
+      todayMatchDateRef.current === todayKey ? todayMatchesRef.current + 1 : 1;
+    todayMatchDateRef.current = todayKey;
+    todayMatchesRef.current = nextTodayMatches;
+    setTodayMatches(nextTodayMatches);
+    AsyncStorage.multiSet([
+      [STORAGE_KEYS.TODAY_MATCH_DATE, todayKey],
+      [STORAGE_KEYS.TODAY_MATCHES, String(nextTodayMatches)],
+    ]).catch(() => {});
+
     return nextCompletedMatches;
   }, []);
 
   const resetScores = useCallback(async () => {
     const resetAt = Date.now();
+    const todayKey = getTodayKey();
     scoreboardsRef.current = EMPTY_SCOREBOARDS;
+    completedMatchesRef.current = 0;
+    currentStreakRef.current = 0;
+    todayMatchDateRef.current = todayKey;
+    todayMatchesRef.current = 0;
     setScoreboards(EMPTY_SCOREBOARDS);
     setScoreboardsResetAt(resetAt);
+    setCompletedMatches(0);
+    setCurrentStreak(0);
+    setTodayMatches(0);
     await Promise.all([
       AsyncStorage.setItem(
         STORAGE_KEYS.SCORES,
         JSON.stringify(EMPTY_SCOREBOARDS)
       ),
       AsyncStorage.setItem(STORAGE_KEYS.SCORES_RESET_AT, String(resetAt)),
+      AsyncStorage.setItem(STORAGE_KEYS.COMPLETED_MATCHES, '0'),
+      AsyncStorage.setItem(STORAGE_KEYS.CURRENT_STREAK, '0'),
+      AsyncStorage.setItem(STORAGE_KEYS.TODAY_MATCH_DATE, todayKey),
+      AsyncStorage.setItem(STORAGE_KEYS.TODAY_MATCHES, '0'),
     ]);
   }, []);
 
@@ -221,6 +305,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         scoreboards,
         scoreboardsResetAt,
         completedMatches,
+        currentStreak,
+        todayMatches,
         soundEnabled,
         hapticsEnabled,
         language,
