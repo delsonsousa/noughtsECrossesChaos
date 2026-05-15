@@ -1,5 +1,5 @@
-import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeModules, Platform } from 'react-native';
 import { STORAGE_KEYS } from './constants';
 
 type GoogleMobileAdsModule = typeof import('react-native-google-mobile-ads');
@@ -8,10 +8,10 @@ type InterstitialAdInstance = ReturnType<
 >;
 
 // Replace these with your real AdMob IDs before going to production
-const BANNER_ID_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
-const BANNER_ID_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
-const INTERSTITIAL_ID_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
-const INTERSTITIAL_ID_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
+const BANNER_ID_ANDROID = 'ca-app-pub-4364549488307348/7869780569';
+const BANNER_ID_IOS = 'ca-app-pub-4364549488307348/6572176612';
+const INTERSTITIAL_ID_ANDROID = 'ca-app-pub-4364549488307348/8669068368';
+const INTERSTITIAL_ID_IOS = 'ca-app-pub-4364549488307348/2297284441';
 const GAME_START_INTERSTITIAL_INTERVAL_MS = 2 * 60 * 1000;
 const GAME_START_INTERSTITIAL_MATCHES = 5;
 const GOOGLE_MOBILE_ADS_NATIVE_MODULE = 'RNGoogleMobileAdsModule';
@@ -47,9 +47,7 @@ export const getBannerAdId = (): string => {
 const getInterstitialAdId = (): string => {
   const ads = getGoogleMobileAdsModule();
   if (__DEV__ && ads != null) return ads.TestIds.INTERSTITIAL;
-  return Platform.OS === 'ios'
-    ? INTERSTITIAL_ID_IOS
-    : INTERSTITIAL_ID_ANDROID;
+  return Platform.OS === 'ios' ? INTERSTITIAL_ID_IOS : INTERSTITIAL_ID_ANDROID;
 };
 
 let interstitial: InterstitialAdInstance | null = null;
@@ -72,9 +70,12 @@ const loadInterstitial = () => {
       return;
     }
 
-    interstitial = ads.InterstitialAd.createForAdRequest(getInterstitialAdId(), {
-      requestNonPersonalizedAdsOnly: false,
-    });
+    interstitial = ads.InterstitialAd.createForAdRequest(
+      getInterstitialAdId(),
+      {
+        requestNonPersonalizedAdsOnly: false,
+      },
+    );
     interstitial.addAdEventListener(ads.AdEventType.LOADED, () => {
       interstitialLoaded = true;
     });
@@ -150,11 +151,11 @@ export const maybeShowGameStartInterstitial = async (): Promise<void> => {
       await Promise.all([
         AsyncStorage.setItem(
           STORAGE_KEYS.AD_LAST_GAME_START_INTERSTITIAL_AT,
-          String(now)
+          String(now),
         ),
         AsyncStorage.setItem(
           STORAGE_KEYS.AD_GAME_STARTS_SINCE_INTERSTITIAL,
-          '1'
+          '1',
         ),
       ]);
       return;
@@ -169,7 +170,7 @@ export const maybeShowGameStartInterstitial = async (): Promise<void> => {
     if (!shouldShowByTime && !shouldShowByMatchCount) {
       await AsyncStorage.setItem(
         STORAGE_KEYS.AD_GAME_STARTS_SINCE_INTERSTITIAL,
-        String(nextStartsSinceInterstitial)
+        String(nextStartsSinceInterstitial),
       );
       return;
     }
@@ -179,7 +180,7 @@ export const maybeShowGameStartInterstitial = async (): Promise<void> => {
     if (!shown) {
       await AsyncStorage.setItem(
         STORAGE_KEYS.AD_GAME_STARTS_SINCE_INTERSTITIAL,
-        String(nextStartsSinceInterstitial)
+        String(nextStartsSinceInterstitial),
       );
       return;
     }
@@ -187,12 +188,9 @@ export const maybeShowGameStartInterstitial = async (): Promise<void> => {
     await Promise.all([
       AsyncStorage.setItem(
         STORAGE_KEYS.AD_LAST_GAME_START_INTERSTITIAL_AT,
-        String(Date.now())
+        String(Date.now()),
       ),
-      AsyncStorage.setItem(
-        STORAGE_KEYS.AD_GAME_STARTS_SINCE_INTERSTITIAL,
-        '0'
-      ),
+      AsyncStorage.setItem(STORAGE_KEYS.AD_GAME_STARTS_SINCE_INTERSTITIAL, '0'),
     ]);
   } catch {
     // silently fail; ads must never block a match from starting

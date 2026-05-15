@@ -15,56 +15,63 @@ const SOUND_ASSETS: Record<SoundName, number> = {
   toggle: require('../assets/sounds/toggle.wav'),
 };
 
+let sharedSounds: Partial<Record<SoundName, Audio.Sound>> = {};
+let sharedLoadPromise: Promise<void> | null = null;
+
+const loadSharedSounds = async () => {
+  if (sharedLoadPromise) {
+    return sharedLoadPromise;
+  }
+
+  sharedLoadPromise = (async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        interruptionModeIOS: 1,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: 1,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: false,
+      });
+
+      const loadedSounds = await Promise.all(
+        (Object.keys(SOUND_ASSETS) as SoundName[]).map(async (name) => {
+          const { sound } = await Audio.Sound.createAsync(
+            SOUND_ASSETS[name],
+            {
+              isLooping: false,
+              shouldPlay: false,
+              volume: 1,
+            }
+          );
+
+          return [name, sound] as const;
+        })
+      );
+
+      sharedSounds = Object.fromEntries(loadedSounds) as Record<
+        SoundName,
+        Audio.Sound
+      >;
+    } catch {
+      sharedSounds = {};
+      sharedLoadPromise = null;
+    }
+  })();
+
+  return sharedLoadPromise;
+};
+
 export const useSound = () => {
   const { soundEnabled } = useGameContext();
-  const soundsRef = useRef<Partial<Record<SoundName, Audio.Sound>>>({});
+  const loadStartedRef = useRef(false);
 
   useEffect(() => {
-    let mounted = true;
-
-    const load = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-        });
-
-        const loadedSounds = await Promise.all(
-          (Object.keys(SOUND_ASSETS) as SoundName[]).map(async (name) => {
-            const { sound } = await Audio.Sound.createAsync(
-              SOUND_ASSETS[name],
-              { shouldPlay: false, volume: name === 'win' ? 0.65 : 0.5 }
-            );
-
-            return [name, sound] as const;
-          })
-        );
-
-        if (!mounted) {
-          await Promise.all(
-            loadedSounds.map(([, sound]) => sound.unloadAsync())
-          );
-          return;
-        }
-
-        soundsRef.current = Object.fromEntries(loadedSounds) as Record<
-          SoundName,
-          Audio.Sound
-        >;
-      } catch {
-        soundsRef.current = {};
-      }
-    };
-
-    void load();
-
-    return () => {
-      mounted = false;
-      Object.values(soundsRef.current).forEach((sound) => {
-        sound?.unloadAsync().catch(() => {});
-      });
-      soundsRef.current = {};
-    };
+    if (!loadStartedRef.current) {
+      loadStartedRef.current = true;
+      void loadSharedSounds();
+    }
   }, []);
 
   const playSound = useCallback(
@@ -73,13 +80,15 @@ export const useSound = () => {
         return;
       }
 
-      const sound = soundsRef.current[name];
+      await loadSharedSounds();
+      const sound = sharedSounds[name];
 
       if (!sound) {
         return;
       }
 
       try {
+        await sound.setVolumeAsync(1);
         await sound.replayAsync();
       } catch {
         // Audio feedback should never block gameplay.

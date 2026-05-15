@@ -40,6 +40,7 @@
     "title": "Configurações",
     "sound": "Som",
     "haptics": "Vibração",
+    "testFeedback": "Testar som e vibração",
     "language": "Idioma",
     "resetScores": "Zerar temporada",
     "confirmReset": "Zerar os placares desta temporada?",

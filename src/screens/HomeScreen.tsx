@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { RootStackParamList } from '../../App';
 import { AdBanner } from '../components/AdBanner';
 import { HomeAtmosphere } from '../components/HomeAtmosphere';
@@ -22,6 +23,7 @@ import { colors } from '../theme/colors';
 export const HomeScreen = () => {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { action: playActionFeedback, move: playMoveFeedback } = useFeedback();
   const { scoreboards, scoreboardsResetAt, todayMatches } = useGameContext();
   const seasonStartDate = new Intl.DateTimeFormat(undefined, {
@@ -47,7 +49,7 @@ export const HomeScreen = () => {
         contentContainerStyle={{
           flexGrow: 1,
           paddingHorizontal: 24,
-          paddingTop: 60,
+          paddingTop: Math.max(insets.top + 18, 60),
           paddingBottom: 16,
         }}
       >
@@ -548,7 +550,6 @@ const DifficultyButton = ({
         justifyContent: 'center',
         alignItems: 'flex-end',
         gap: 5,
-        marginBottom: 14,
       }}
     >
       {[1, 2, 3].map((i) => {

@@ -17,8 +17,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "androidAppId": "ca-app-pub-4364549488307348~1266055213",
+          "iosAppId": "ca-app-pub-4364549488307348~7355986699",
           "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
         }
       ],
@@ -26,13 +26,15 @@
     ],
     "android": {
       "package": "com.delson.noughtscrosseschaos",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
         "backgroundColor": "#090014"
       },
       "permissions": [
-        "com.google.android.gms.permission.AD_ID"
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.VIBRATE"
       ]
     },
     "ios": {
@@ -41,32 +43,12 @@
       "infoPlist": {
         "SKAdNetworkItems": [],
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
-        "CFBundleLocalizations": [
-          "en",
-          "pt",
-          "es",
-          "en",
-          "pt",
-          "es",
-          "en",
-          "pt",
-          "es",
-          "en",
-          "pt",
-          "es"
-        ],
+        "CFBundleLocalizations": ["en", "pt", "es"],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "extra": {
-      "supportedLocales": [
-        "en",
-        "pt",
-        "es",
-        "en",
-        "pt",
-        "es"
-      ],
+      "supportedLocales": ["en", "pt", "es"],
       "eas": {
         "projectId": "80750b42-25a8-4822-9cb4-ea5282e46308"
       }

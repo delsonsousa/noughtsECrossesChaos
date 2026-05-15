@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import * as Haptics from 'expo-haptics';
+import { Platform, Vibration } from 'react-native';
 import { useGameContext } from '../store/GameContext';
 import { useSound } from './useSound';
 
@@ -17,14 +18,21 @@ export const useFeedback = () => {
     [hapticsEnabled]
   );
 
+  const vibrateFallback = useCallback((pattern: number | number[]) => {
+    if (Platform.OS === 'android') {
+      Vibration.vibrate(pattern);
+    }
+  }, []);
+
   const move = useCallback(
     (options: FeedbackOptions = {}) => {
       void playMove({ force: options.forceSound });
       if (canHaptic(options.forceHaptics)) {
         void Haptics.selectionAsync();
+        vibrateFallback(18);
       }
     },
-    [canHaptic, playMove]
+    [canHaptic, playMove, vibrateFallback]
   );
 
   const action = useCallback(
@@ -32,9 +40,10 @@ export const useFeedback = () => {
       void playAction({ force: options.forceSound });
       if (canHaptic(options.forceHaptics)) {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        vibrateFallback(26);
       }
     },
-    [canHaptic, playAction]
+    [canHaptic, playAction, vibrateFallback]
   );
 
   const success = useCallback(
@@ -42,9 +51,10 @@ export const useFeedback = () => {
       void playWin({ force: options.forceSound });
       if (canHaptic(options.forceHaptics)) {
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        vibrateFallback([0, 35, 45, 70]);
       }
     },
-    [canHaptic, playWin]
+    [canHaptic, playWin, vibrateFallback]
   );
 
   const toggle = useCallback(
@@ -52,9 +62,10 @@ export const useFeedback = () => {
       void playToggle({ force: options.forceSound });
       if (canHaptic(options.forceHaptics)) {
         void Haptics.selectionAsync();
+        vibrateFallback(16);
       }
     },
-    [canHaptic, playToggle]
+    [canHaptic, playToggle, vibrateFallback]
   );
 
   return {

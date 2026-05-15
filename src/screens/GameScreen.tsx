@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   Pressable,
   Animated,
   Modal,
@@ -14,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, Line } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme/colors';
 import { Grid } from '../components/Grid';
 import { Button } from '../components/Button';
@@ -185,7 +185,7 @@ export const GameScreen: React.FC<Props> = ({ navigation, route }) => {
       style={styles.safe}
     >
       <HomeAtmosphere />
-      <SafeAreaView style={styles.content}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.content}>
         <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
         {/* Header */}

@@ -40,6 +40,7 @@
     "title": "Settings",
     "sound": "Sound",
     "haptics": "Haptic Feedback",
+    "testFeedback": "Test sound and vibration",
     "language": "Language",
     "resetScores": "Reset Season",
     "confirmReset": "Reset this season's scores?",

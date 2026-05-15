@@ -42,9 +42,11 @@ export const SplashTitle: React.FC<SplashTitleProps> = ({
 );
 
 const titleText = {
-  fontSize: 64,
+  fontSize: 58,
   fontFamily: 'Bungee_400Regular',
+  lineHeight: 70,
   letterSpacing: 4,
+  includeFontPadding: false,
 };
 
 const styles = StyleSheet.create({
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 90,
+    height: 112,
   },
   titleMain: {
     ...titleText,
@@ -82,6 +84,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     fontFamily: 'SpaceGrotesk_500Medium',
+    lineHeight: 18,
     color: colors.neonCyan,
     letterSpacing: 6,
   },

@@ -40,6 +40,7 @@
     "title": "Ajustes",
     "sound": "Sonido",
     "haptics": "Vibración",
+    "testFeedback": "Probar sonido y vibración",
     "language": "Idioma",
     "resetScores": "Reiniciar temporada",
     "confirmReset": "¿Reiniciar las puntuaciones de esta temporada?",

@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { Bungee_400Regular, useFonts } from '@expo-google-fonts/bungee';
 import { SpaceGrotesk_500Medium } from '@expo-google-fonts/space-grotesk';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameScreen } from './src/screens/GameScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
@@ -41,23 +42,29 @@ export default function App() {
   }, []);
 
   if (!splashDone) {
-    return <SplashScreen onFinish={handleSplashFinish} />;
+    return (
+      <SafeAreaProvider>
+        <SplashScreen onFinish={handleSplashFinish} />
+      </SafeAreaProvider>
+    );
   }
 
   if (!fontsLoaded) return null;
 
   return (
-    <GameProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Game" component={GameScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </GameProvider>
+    <SafeAreaProvider>
+      <GameProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Game" component={GameScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GameProvider>
+    </SafeAreaProvider>
   );
 }

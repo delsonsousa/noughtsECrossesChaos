@@ -1,0 +1,13 @@
+name: Delson Local AI
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Qwen Local
+    provider: ollama
+    model: qwen2.5-coder:7b
+    apiBase: http://192.168.1.250:11434
+    defaultCompletionOptions:
+      temperature: 0.2
+      contextLength: 8192
+      maxTokens: 1024

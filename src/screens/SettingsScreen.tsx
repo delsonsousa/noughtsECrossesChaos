@@ -5,11 +5,11 @@ import {
   Switch,
   Pressable,
   StyleSheet,
-  SafeAreaView,
   Alert,
   ScrollView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
@@ -53,13 +53,21 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleSoundChange = (value: boolean) => {
-    playToggleFeedback({ forceSound: value });
     void setSoundEnabled(value);
+    if (value) {
+      playToggleFeedback({ forceSound: true });
+    }
   };
 
   const handleHapticsChange = (value: boolean) => {
-    playToggleFeedback({ forceHaptics: value });
     void setHapticsEnabled(value);
+    if (value) {
+      playToggleFeedback({ forceHaptics: true });
+    }
+  };
+
+  const handleTestFeedback = () => {
+    playToggleFeedback();
   };
 
   const handleResetScores = () => {
@@ -117,6 +125,16 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               />
             }
           />
+          <Pressable
+            onPress={handleTestFeedback}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              styles.testBtn,
+              pressed && { opacity: 0.75 },
+            ]}
+          >
+            <Text style={styles.testBtnText}>{t('settings.testFeedback')}</Text>
+          </Pressable>
         </View>
 
         <View style={styles.section}>
@@ -202,6 +220,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
+  },
+  testBtn: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.accent + '12',
+  },
+  testBtnText: {
+    color: colors.accent,
+    fontWeight: '700',
+    fontSize: 15,
   },
   dangerBtn: {
     borderWidth: 1,
